@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.2"
+             xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+
+    <persistence-unit name="hello">
+        <properties>
+            <!-- 필수 속성 -->
+            <!--데이터베이스 접근정보-->
+            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="javax.persistence.jdbc.user" value="sa"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/~/test"/>
+
+            <!--사용하는 DB전용 Dialect 필요-->
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+            <!--<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>-->
+
+
+            <!-- 옵션 -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.use_sql_comments" value="true"/>
+
+            <!--설정 값 개수 만큼 쿼리 모았다가 한번에 전송, 실행 후 커밋 (배치 작업 등에 활용성 높음)-->
+            <!--<property name="hibernate.jdbc.batch_size" value="10"/>-->
+
+            <!--애플리케이션 실행할 때 데이터베이스 스키마 자동생성(운영에선 절대 X)-->
+            <property name="hibernate.hbm2ddl.auto" value="create"/>
+            <!--<property name="hibernate.hbm2ddl.auto" value="create-drop"/>-->
+            <!--<property name="hibernate.hbm2ddl.auto" value="update"/>-->
+            <!--<property name="hibernate.hbm2ddl.auto" value="validate"/>-->
+        </properties>
+    </persistence-unit>
+</persistence>
