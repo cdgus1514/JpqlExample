@@ -1,2 +1,2 @@
-# JpqlExample-
+# JpqlExample
 JPQL 공부
