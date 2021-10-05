@@ -52,69 +52,94 @@ public class JpaMain {
              * 프로젝션
              * SELECT 절에 조회할 대상
              */
-
-            Member member = new Member();
-            member.setUsername("member1");
-            member.setAge(10);
-            em.persist(member);
-
-            em.flush();
-            em.clear();
+//            Member member = new Member();
+//            member.setUsername("member1");
+//            member.setAge(10);
+//            em.persist(member);
+//
+//            em.flush();
+//            em.clear();
 
             // 엔티티 프로젝션
-            List<Member> result = em.createQuery("select m from Member m", Member.class)
-                    .getResultList();
+//            List<Member> result = em.createQuery("select m from Member m", Member.class)
+//                    .getResultList();
 
 
             // 업데이트 됨 > 영속성 컨텍스트에서 관리
-            Member findMember = result.get(0);
-            findMember.setAge(20);
+//            Member findMember = result.get(0);
+//            findMember.setAge(20);
 
             System.out.println("================================================================================");
 
             // 엔티티 프로젝션 사용 시 해당 엔티티에 맞춰줘야 함
             // Team 하고 inner join
-            List<Team> result2 = em.createQuery("select m.team from Member m", Team.class)
-                    .getResultList();
+//            List<Team> result2 = em.createQuery("select m.team from Member m", Team.class)
+//                    .getResultList();
 
             
             // 임베디드 타입 프로젝션
             // Order에 들어있는 값 타입으로 Address에 관련된 값만 정상적으로 불러옴
-            em.createQuery("select o.address from Order o", Address.class)
-                    .getResultList();
+//            em.createQuery("select o.address from Order o", Address.class)
+//                    .getResultList();
 
 
             // 스칼라 타입 프로젝션 > 여러 값(여러 타입) 조회 시
 
             // 1) Query 타입
-            List resultList = em.createQuery("select distinct m.username, m.age from Member m")
-                    .getResultList();
-
-            Object o = resultList.get(0);
-            Object[] resulto = (Object[]) o;
-
-            System.out.println("================================================================================");
-            System.out.println(resulto[0]);
-            System.out.println(resulto[1]);
+//            List resultList = em.createQuery("select distinct m.username, m.age from Member m")
+//                    .getResultList();
+//
+//            Object o = resultList.get(0);
+//            Object[] resulto = (Object[]) o;
+//
+//            System.out.println("================================================================================");
+//            System.out.println(resulto[0]);
+//            System.out.println(resulto[1]);
 
 
             // 2) Object[] 타입
-            List<Object[]> resultList2 = em.createQuery("select distinct m.username, m.age from Member m")
-                    .getResultList();
-
-            System.out.println("================================================================================");
-            Object[] resulto2 = resultList2.get(0);
-            System.out.println(resulto2[0]);
-            System.out.println(resulto2[1]);
+//            List<Object[]> resultList2 = em.createQuery("select distinct m.username, m.age from Member m")
+//                    .getResultList();
+//
+//            System.out.println("================================================================================");
+//            Object[] resulto2 = resultList2.get(0);
+//            System.out.println(resulto2[0]);
+//            System.out.println(resulto2[1]);
 
 
             // 3) new 명령어 사용 > 생성자 필요!
-            List<MemberDTO> resultList3 = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)
+//            List<MemberDTO> resultList3 = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)
+//                    .getResultList();
+//
+//            MemberDTO memberDTO = resultList3.get(0);
+//            System.out.println("memberDTO = " + memberDTO.getUsername());
+//            System.out.println("memberDTO = " + memberDTO.getAge());
+
+
+            /**
+             * 페이징 처리
+             */
+            for(int i=0; i<100; i++) {
+                Member member = new Member();
+                member.setUsername("memeber"+i);
+                member.setAge(i);
+                em.persist(member);
+            }
+
+            em.flush();
+            em.clear();
+
+            List<Member> result = em.createQuery("select m from Member m order by m.age desc", Member.class)
+                    .setFirstResult(1)
+                    .setMaxResults(10)
                     .getResultList();
 
-            MemberDTO memberDTO = resultList3.get(0);
-            System.out.println("memberDTO = " + memberDTO.getUsername());
-            System.out.println("memberDTO = " + memberDTO.getAge());
+            System.out.println("result = " + result.size());
+            for (Member member1 : result) {
+                System.out.println("member1 = " + member1);
+            }
+
+
 
             tx.commit();
         }catch (Exception e) {

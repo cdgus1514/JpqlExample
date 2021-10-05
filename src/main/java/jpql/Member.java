@@ -41,4 +41,15 @@ public class Member {
     public void setAge(int age) {
         this.age = age;
     }
+
+
+    // toString 사용 시 양방향 관계는 사용하지 말아야함
+    @Override
+    public String toString() {
+        return "Member{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", age=" + age +
+                '}';
+    }
 }
