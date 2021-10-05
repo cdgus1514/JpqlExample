@@ -23,6 +23,10 @@ public class Member {
     }
 
 
+    @Enumerated(EnumType.STRING)
+    private MemberType type;
+
+
 
     public Long getId() {
         return id;
@@ -54,6 +58,14 @@ public class Member {
 
     public void setTeam(Team team) {
         this.team = team;
+    }
+
+    public MemberType getType() {
+        return type;
+    }
+
+    public void setType(MemberType type) {
+        this.type = type;
     }
 
     // toString 사용 시 양방향 관계는 사용하지 말아야함

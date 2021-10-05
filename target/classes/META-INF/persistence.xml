@@ -13,8 +13,11 @@
             <property name="javax.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/~/test"/>
 
             <!--사용하는 DB전용 Dialect 필요-->
-            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+            <!--<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>-->
             <!--<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>-->
+
+            <!-- 등록한 Dialect 사용 -->
+            <property name="hibernate.dialect" value="dialect.MyH2Dialect"/>
 
 
             <!-- 옵션 -->

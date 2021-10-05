@@ -143,20 +143,23 @@ public class JpaMain {
             /**
              * 조인
              */
-            Team team = new Team();
-            team.setName("teamA");
-            em.persist(team);
-
-            Member member = new Member();
-//            member.setUsername("memeber1");
-            member.setUsername("teamA");
-            member.setAge(10);
-            member.setTeam(team);
-            em.persist(member);
-
-
-            em.flush();
-            em.clear();
+//            Team team = new Team();
+//            team.setName("teamA");
+//            em.persist(team);
+//
+//            Member member = new Member();
+////            member.setUsername("memeber1");
+////            member.setUsername("teamA");
+////            member.setUsername(null);
+//            member.setUsername("관리자");
+//            member.setAge(10);
+//            member.setType(MemberType.ADMIN);
+//            member.setTeam(team);
+//            em.persist(member);
+//
+//
+//            em.flush();
+//            em.clear();
 
             // ManyToOne 에서 LAZY 타입으로 설정 안하면 쿼리 2번 날림
 //            String query = "select m from Member m join m.team t";        // 내부조인
@@ -164,13 +167,123 @@ public class JpaMain {
 //            String query = "select m from Member m, Team t where m.username = t.name";  // 세타조인
 
 //            String query = "select m from Member m left join m.team t on t.name = 'teamA'";
-            String query = "select m from Member m join Team t on m.username = t.name";
+//            String query = "select m from Member m join Team t on m.username = t.name";
+//
+//            List<Member> result = em.createQuery(query, Member.class)
+//                    .getResultList();
+//
+//
+//            System.out.println("result = " + result.toString());
 
-            List<Member> result = em.createQuery(query, Member.class)
+
+            /**
+             * 타입표현
+             */
+//            String query = "select m.username, 'HELLO', TRUE from Member m";
+//            List<Object[]> result = em.createQuery(query).getResultList();
+//
+//            for (Object[] o : result) {
+//                System.out.println("o.[0] = " + o[0]);
+//                System.out.println("o.[0] = " + o[1]);
+//                System.out.println("o.[0] = " + o[2]);
+//            }
+
+
+            // enum 타입은 '패키지명'까지 넣어줘야 함
+            //String query = "select m.username, 'HELLO', TRUE from Member m where m.type = jpql.MemberType.USER";
+//            String query = "select m.username, 'HELLO', TRUE from Member m where m.type = :userType";
+//            List<Object[]> result = em.createQuery(query)
+//                    .setParameter("userType", MemberType.USER)
+//                    .getResultList();
+//
+//            for (Object[] o : result) {
+//                System.out.println("o.[0] = " + o[0]);
+//                System.out.println("o.[0] = " + o[1]);
+//                System.out.println("o.[0] = " + o[2]);
+//            }
+
+
+            /**
+             * 조건식
+             */
+            // CASE식
+            String query = "select " +
+                                "case when m.age <= 10 then '학생요금' " +
+                                "     when m.age >= 60 then '경로요금' " +
+                                "     else '일반욕금' " +
+                           "end " +
+                           "from Member m";
+//            List<String> result = em.createQuery(query, String.class)
+//                    .getResultList();
+//
+//            for (String s : result) {
+//                System.out.println("s = " + s);
+//            }
+
+
+            // COALESCE (하나씩 조회해서 null이 아니면 반환)
+            String query2 = "select coalesce(m.username, '이름없는 회원') from Member m";
+//            List<String> result = em.createQuery(query2, String.class)
+//                    .getResultList();
+//
+//            for (String s : result) {
+//                System.out.println("s = " + s);
+//            }
+
+
+            // NULLIF (두 값이 같으면 null, 다르면  첫 번째 값 반환)
+            String query3 = "select nullif(m.username, '관리자') from Member m";
+//            List<String> result = em.createQuery(query3, String.class)
+//                    .getResultList();
+//
+//            for (String s : result) {
+//                System.out.println("s = " + s);
+//            }
+
+
+
+            /**
+             * 기본함수
+             */
+            Member member1 = new Member();
+            member1.setUsername("관리자1");
+            em.persist(member1);
+
+            Member member2 = new Member();
+            member2.setUsername("관리자2");
+            em.persist(member2);
+
+            em.flush();
+            em.clear();
+
+
+            // 기본분법
+
+            // 1) size() > 양방향 관계 시 해당 엔티티의 컬렉션 크기 반환
+            String query4 = "select size(t.members) from Team t";
+//            List<Integer> result = em.createQuery(query4, Integer.class)
+//                    .getResultList();
+//
+//            for (Integer i : result) {
+//                System.out.println("i = " + i);
+//            }
+
+
+            // 사용자 정의함수 (DB에 정의된 함수 사용하기)
+
+            // ex) function group_concat 사용
+            // 1) dialect에 생성자로 해당함수 등록
+            // 2) persistence.xml 등록 (org.hibernate.dialect.H2Dialect > MyH2Dialect)
+
+            String query5 = "select function('group_concat', m.username) from Member m";
+            List<String> result = em.createQuery(query5, String.class)
                     .getResultList();
 
+            for (String s : result) {
+                System.out.println("s = " + s);
+            }
 
-            System.out.println("result = " + result.toString());
+
 
             tx.commit();
         }catch (Exception e) {
