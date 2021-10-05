@@ -119,27 +119,58 @@ public class JpaMain {
             /**
              * 페이징 처리
              */
-            for(int i=0; i<100; i++) {
-                Member member = new Member();
-                member.setUsername("memeber"+i);
-                member.setAge(i);
-                em.persist(member);
-            }
+//            for(int i=0; i<100; i++) {
+//                Member member = new Member();
+//                member.setUsername("memeber"+i);
+//                member.setAge(i);
+//                em.persist(member);
+//            }
+//
+//            em.flush();
+//            em.clear();
+//
+//            List<Member> result = em.createQuery("select m from Member m order by m.age desc", Member.class)
+//                    .setFirstResult(1)
+//                    .setMaxResults(10)
+//                    .getResultList();
+//
+//            System.out.println("result = " + result.size());
+//            for (Member member1 : result) {
+//                System.out.println("member1 = " + member1);
+//            }
+
+
+            /**
+             * 조인
+             */
+            Team team = new Team();
+            team.setName("teamA");
+            em.persist(team);
+
+            Member member = new Member();
+//            member.setUsername("memeber1");
+            member.setUsername("teamA");
+            member.setAge(10);
+            member.setTeam(team);
+            em.persist(member);
+
 
             em.flush();
             em.clear();
 
-            List<Member> result = em.createQuery("select m from Member m order by m.age desc", Member.class)
-                    .setFirstResult(1)
-                    .setMaxResults(10)
+            // ManyToOne 에서 LAZY 타입으로 설정 안하면 쿼리 2번 날림
+//            String query = "select m from Member m join m.team t";        // 내부조인
+//            String query = "select m from Member m left join m.team t";   // 외부
+//            String query = "select m from Member m, Team t where m.username = t.name";  // 세타조인
+
+//            String query = "select m from Member m left join m.team t on t.name = 'teamA'";
+            String query = "select m from Member m join Team t on m.username = t.name";
+
+            List<Member> result = em.createQuery(query, Member.class)
                     .getResultList();
 
-            System.out.println("result = " + result.size());
-            for (Member member1 : result) {
-                System.out.println("member1 = " + member1);
-            }
 
-
+            System.out.println("result = " + result.toString());
 
             tx.commit();
         }catch (Exception e) {
