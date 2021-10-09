@@ -399,26 +399,70 @@ public class JpaMain {
             //String jpql2 = "select m from Member m join fetch m.team t";
 
             // 2) BatchSize 사용
-            String jpql2 = "select t from Team t";
-
-            List<Team> result = em.createQuery(jpql2, Team.class)
-                    .setFirstResult(0)
-                    .setMaxResults(2)
-                    .getResultList();
-            
-            for (Team t : result) {
-                System.out.println("team : " + t.getName() + ", members : " + t.getMembers().size());
-
-                for (Member m : t.getMembers()) {
-                    System.out.println("> member : " + m);
-                }
-            }
+//            String jpql2 = "select t from Team t";
+//
+//            List<Team> result = em.createQuery(jpql2, Team.class)
+//                    .setFirstResult(0)
+//                    .setMaxResults(2)
+//                    .getResultList();
+//
+//            for (Team t : result) {
+//                System.out.println("team : " + t.getName() + ", members : " + t.getMembers().size());
+//
+//                for (Member m : t.getMembers()) {
+//                    System.out.println("> member : " + m);
+//                }
+//            }
             
             /* 패치조인 vs 일반조인 */
             
             // "일반조인"은 연관된 엔티티를 함께 조회하지 않음 > 연관된 엔티티 데이터 호출 시 추가로 조회 실행
             // "패치조인"은 다가져옴
 
+
+            /**
+             * 엔티티 직접 사용
+             */
+
+            // 엔티티를 파라미터로 전달
+//            String q = "select m from Member m where m = :member";
+
+            // 식별자를 파라미터로 전달
+//            String q = "select m from Member m where m.id = :memberId";
+
+            // 외래 키 값을 파라미터로 전달
+//            String q = "select m from Member m where m.team = :team";
+//
+//
+//            Member result = em.createQuery(q, Member.class)
+//                    //.setParameter("member", member1)
+//                    //.setParameter("memberId", member1.getId())
+//                    .setParameter("team", team2)
+//                    .getSingleResult();
+//
+//            System.out.println("result = " + result);
+
+
+            /**
+             * named 쿼리
+             */
+//            Member result = em.createNamedQuery("Member.findByUsername", Member.class)
+//                    .setParameter("username", "회원1")
+//                    .getSingleResult();
+//
+//            System.out.println("result = " + result);
+
+
+            
+            /**
+             * 벌크연산
+             * 여러개를 한번에 삭제 또는 업데이트 해야하는 경우 > JPA 변경감지를 사용하면 개수만큼 쿼리날림..
+             */
+
+            int resultCount = em.createQuery("update Member m set m.age = 20")
+                    .executeUpdate();
+
+            System.out.println("resultCount = " + resultCount);
 
             tx.commit();
         }catch (Exception e) {
