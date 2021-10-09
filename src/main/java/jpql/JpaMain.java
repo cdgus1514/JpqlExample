@@ -1,6 +1,7 @@
 package jpql;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.List;
 
 public class JpaMain {
@@ -245,44 +246,178 @@ public class JpaMain {
             /**
              * 기본함수
              */
-            Member member1 = new Member();
-            member1.setUsername("관리자1");
-            em.persist(member1);
+//            Member member1 = new Member();
+//            member1.setUsername("관리자1");
+//            em.persist(member1);
+//
+//            Member member2 = new Member();
+//            member2.setUsername("관리자2");
+//            em.persist(member2);
+//
+//            em.flush();
+//            em.clear();
+//
+//
+//            // 기본분법
+//
+//            // 1) size() > 양방향 관계 시 해당 엔티티의 컬렉션 크기 반환
+//            String query4 = "select size(t.members) from Team t";
+////            List<Integer> result = em.createQuery(query4, Integer.class)
+////                    .getResultList();
+////
+////            for (Integer i : result) {
+////                System.out.println("i = " + i);
+////            }
+//
+//
+//            // 사용자 정의함수 (DB에 정의된 함수 사용하기)
+//
+//            // ex) function group_concat 사용
+//            // 1) dialect에 생성자로 해당함수 등록
+//            // 2) persistence.xml 등록 (org.hibernate.dialect.H2Dialect > MyH2Dialect)
+//
+//            String query5 = "select function('group_concat', m.username) from Member m";
+//            List<String> result = em.createQuery(query5, String.class)
+//                    .getResultList();
+//
+//            for (String s : result) {
+//                System.out.println("s = " + s);
+//            }
 
-            Member member2 = new Member();
-            member2.setUsername("관리자2");
+
+            /**
+             * 경로 표현식
+             */
+//            Team team = new Team();
+//            team.setName("team1");
+//            em.persist(team);
+//
+//            Member member1 = new Member();
+//            member1.setUsername("관리자1");
+//            member1.setTeam(team);
+//            em.persist(member1);
+//
+//            Member member2 = new Member();
+//            member2.setUsername("관리자2");
+//            member2.setTeam(team);
+//            em.persist(member2);
+//
+//            em.flush();
+//            em.clear();
+//
+//            // 1. 상태필드 > 경로 탐색 끝, 탐색 X
+//            String query6 = "select m.username from Member m";
+//
+//
+//            // 2. 단일 값 연관경로 > 묵시적 내부조인 발생(조인 쿼리를 안써도 알아서 조인해서 가져옴), 탐색 O
+//            // 묵시적 내부조인이 발생하도록 작성하면 안됨
+//            String query7 = "select m.team from Member m";
+//
+//            // team.name, team.members 다른 경로로 갈 수 있음
+//            //String query7 = "select m.team.name from Member m";
+//
+//
+//
+//            // 3. 컬렉션 값 > 묵시적 내부조인 발생, 탐색 X
+//            // 컬렉션 값 연관 관계(1:N) 컬렉션에서 어떤 값을 꺼내야 할지 어려움
+//            //String query8 = "select t.members from Team t";
+//
+//            // t.members 에서 다른경로 못찾음 (탐색 불가)
+//            //String query8 = "select t.members.size from Team t";
+//
+//            // t.memebers에서 탐색이 필요한 경우 > 명시적 조인 사용
+//            String query8 = "select m.username from Team t join t.members m";
+//
+//
+//            List<Collection> result = em.createQuery(query8, Collection.class)
+//                    .getResultList();
+////                    .getSingleResult();
+//
+//            System.out.println("result = " + result);
+
+//            for (Object s : result) {
+//                System.out.println("s = " + s);
+//            }
+
+
+            /**
+             * ★패치조인
+             * 즉시 로딩처럼 보이나 묵시적 조인이 아닌 명시적 조인으로 동적쿼리 작성가능
+             * 실무에서 정말 중요!
+             */
+            Team team1 = new Team();
+            Team team2 = new Team();
+            team1.setName("팀A");
+            team2.setName("팀B");
+            em.persist(team1);
+            em.persist(team2);
+
+            Member member1  = new Member();
+            Member member2  = new Member();
+            Member member3  = new Member();
+            member1.setUsername("회원1");
+            member1.setTeam(team1);
+            member2.setUsername("회원2");
+            member2.setTeam(team1);
+            member3.setUsername("회원3");
+            member3.setTeam(team2);
+            em.persist(member1);
             em.persist(member2);
+            em.persist(member3);
 
             em.flush();
             em.clear();
 
 
-            // 기본분법
+            // 양방향 연관관계(LAZY) > 지연로딩으로 Member.username 호출 후 Team.name 호출할 때마다 프록시(Team 조회)
+            //String jpql = "select m from Member m";
 
-            // 1) size() > 양방향 관계 시 해당 엔티티의 컬렉션 크기 반환
-            String query4 = "select size(t.members) from Team t";
-//            List<Integer> result = em.createQuery(query4, Integer.class)
+            // 명시적 조인으로 쿼리 한방에 조회가능 (엔티티로 결과를 가져와서 프록시 필요 없음)
+            String jpql = "select m from Member m join fetch m.team";
+
+//            List<Member> result = em.createQuery(jpql, Member.class)
 //                    .getResultList();
 //
-//            for (Integer i : result) {
-//                System.out.println("i = " + i);
+//            for(Member m : result) {
+//                System.out.println(" result : " + m.getUsername() + ", " + m.getTeam().getName());
+//                // 회원1, 팀A(SQL)
+//                // 회원2, 팀A(1차 캐시)
+//                // 회원3, 팀B(SQL)
 //            }
 
 
-            // 사용자 정의함수 (DB에 정의된 함수 사용하기)
+            /* 컬렉션 패치조인 */
+            // 데이터 뻥튀기됨 (team은 member 얼마나 있는지 모름)
+            //String jpql2 = "select t from Team t join fetch t.members";
 
-            // ex) function group_concat 사용
-            // 1) dialect에 생성자로 해당함수 등록
-            // 2) persistence.xml 등록 (org.hibernate.dialect.H2Dialect > MyH2Dialect)
+            // 중복제거해도 결과가 달라서 중복제거 안됨 > 같은 식별자 Team 엔티티 제거시도 → 컬렉션 중복제거
+            // 컬렉션 패치조인 후 페이징 사용 시 페이징으로 가져오는게 아닌 전체를 가져오고 메모리에서 페이징(사용X)
+            //String jpql2 = "select distinct t from Team t join fetch t.members";
 
-            String query5 = "select function('group_concat', m.username) from Member m";
-            List<String> result = em.createQuery(query5, String.class)
+            // 페이징이 필요한 경우
+            // 1) N:1로 바꿔서 조회
+            //String jpql2 = "select m from Member m join fetch m.team t";
+
+            // 2) BatchSize 사용
+            String jpql2 = "select t from Team t";
+
+            List<Team> result = em.createQuery(jpql2, Team.class)
+                    .setFirstResult(0)
+                    .setMaxResults(2)
                     .getResultList();
+            
+            for (Team t : result) {
+                System.out.println("team : " + t.getName() + ", members : " + t.getMembers().size());
 
-            for (String s : result) {
-                System.out.println("s = " + s);
+                for (Member m : t.getMembers()) {
+                    System.out.println("> member : " + m);
+                }
             }
-
+            
+            /* 패치조인 vs 일반조인 */
+            
+            // "일반조인"은 연관된 엔티티를 함께 조회하지 않음 > 연관된 엔티티 데이터 호출 시 추가로 조회 실행
+            // "패치조인"은 다가져옴
 
 
             tx.commit();
